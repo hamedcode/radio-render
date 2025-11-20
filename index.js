@@ -13,9 +13,13 @@ const stations = {
     name: "Radio GL",
     url: "https://shoutcast2.glwiz.com:8000/RadioGL.mp3"
   },
-  "/simorgh": {
-    name: "Radio Simorgh",
-    url: "https://shoutcast2.glwiz.com:8000/radiosimorghoriginalpersianmusic.mp3"
+    "/70spersian": {
+    name: "70s persian",
+    url: "https://shoutcast.glwiz.com/KMspersian.mp3"
+  },
+  "/azari": {
+    name: "azari",
+    url: "https://shoutcast.glwiz.com/KMsazeri.mp3"
   }
 };
 
@@ -60,3 +64,4 @@ app.get("/:name", (req, res) => {
 // سرور Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
+
