@@ -5,37 +5,58 @@ const app = express();
 
 // لیست رادیوها
 const stations = {
-  "/rj": "https://shoutcast2.glwiz.com:8000/Radio_javan.mp3",
-  "/gl": "https://shoutcast2.glwiz.com:8000/RadioGL.mp3",
-  "/simorgh": "https://shoutcast2.glwiz.com:8000/radiosimorghoriginalpersianmusic.mp3"
+  "/rj": {
+    name: "Radio Javan",
+    url: "https://shoutcast2.glwiz.com:8000/Radio_javan.mp3"
+  },
+  "/gl": {
+    name: "Radio GL",
+    url: "https://shoutcast2.glwiz.com:8000/RadioGL.mp3"
+  },
+  "/simorgh": {
+    name: "Radio Simorgh",
+    url: "https://shoutcast2.glwiz.com:8000/radiosimorghoriginalpersianmusic.mp3"
+  }
 };
 
-// مسیر اصلی رادیوها
+// صفحه اصلی: نمایش رادیوها و لینک‌ها
+app.get("/", (req, res) => {
+  let html = "<h2>Radio Proxy is running!</h2><ul>";
+  for (const path in stations) {
+    html += `<li><b>${stations[path].name}</b>: <a href="${path}">${path}</a></li>`;
+  }
+  html += "</ul>";
+  res.send(html);
+});
+
+// مسیر رادیوها
 app.get("/:name", (req, res) => {
   const path = "/" + req.params.name;
-  const url = stations[path];
+  const station = stations[path];
 
-  if (!url) {
+  if (!station) {
     res.status(404).send("Radio not found");
     return;
   }
 
-  console.log("Proxying:", url);
+  console.log("Proxying:", station.url);
 
   // هدرهای سازگار با استریم
   res.setHeader("Content-Type", "audio/mpeg");
   res.setHeader("Cache-Control", "no-store");
 
-  // بدون بافر → passthrough مستقیم
+  // passthrough مستقیم بدون بافر
   request({
-    url: url,
+    url: station.url,
     headers: { "Icy-MetaData": "1" },
-  }).on("error", (err) => {
-    console.error(err);
-    res.end();
-  }).pipe(res);
+  })
+    .on("error", (err) => {
+      console.error("Stream error:", err);
+      res.end();
+    })
+    .pipe(res);
 });
 
-// سرور Replit
+// سرور Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
